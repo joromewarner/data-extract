@@ -12,7 +12,7 @@ filename = "urls.txt"
 
 list = File.new(filename, "r")
 
-arr = list.readlines
+websites_from_file = list.readlines
 
 list.close
 
@@ -24,8 +24,8 @@ driver = Selenium::WebDriver.for :firefox
 emailbody = ""
 
 #Looping The Website
-#for urls in arr can also be used
-arr.each do |urls|
+#for urls in text_from_file can also be used
+websites_from_file.each do |urls|
 
 driver.navigate.to "https://www.webpagetest.org"
 
@@ -40,26 +40,26 @@ websiteurl.send_keys urls
 
 # Click Button
 
-SubmitButton = driver.find_element(:class, "start_test")
+submit_button = driver.find_element(:class, "start_test")
 
-SubmitButton.click
+submit_button.click
 
 # Timeout/Idle code then check for elements
 
 wait = Selenium::WebDriver::Wait.new(:timeout => 300)
 
-loadtime = wait.until {
-    element = driver.find_element(:id, "LoadTime")
-    element if element.displayed?
+load_time = wait.until {
+  loading = driver.find_element(:id, "LoadTime")
+  loading if loading.displayed?
 }
 
-element = driver.find_element(:id, "TTFB")
+first_byte = driver.find_element(:id, "TTFB")
 
-puts "Test Passed" if loadtime && element
-puts loadtime.text, element.text
+puts "Test Passed" if load_time && first_byte
+puts load_time.text, first_byte.text
 
 
-emailbody = emailbody + "Values are #{loadtime.text}(Load Time), #{element.text}(First Byte), and is the website I used for #{urls}\n\n"
+emailbody = emailbody + "Values are #{load_time.text}(Load Time), #{first_byte.text}(First Byte), and is the website I used for #{urls}\n\n"
 
 end
 
@@ -70,15 +70,12 @@ config = YAML.load_file("cred.yml")
 
 gmail = Gmail.connect(config["config"]["email"], config["config"]["password"])
 
-puts gmail.logged_in?
-
-puts gmail.inbox.count
-
 email = gmail.compose do
   to config["config"]["email"]
   subject "I did it!"
   body " #{emailbody} "
 end
+
 email.deliver!
 
 gmail.logout
