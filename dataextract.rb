@@ -5,6 +5,8 @@ require 'rubygems'
 require 'gmail'
 require 'nokogiri' 
 require 'selenium-webdriver'
+require 'open-uri'
+require 'crack/xml'
 
 # Pass File Into Script
 
@@ -42,24 +44,33 @@ websiteurl.send_keys urls
 
 submit_button = driver.find_element(:class, "start_test")
 
-submit_button.click
+submit_button.click 
 
-# Timeout/Idle code then check for elements
+# Timeout/Idle code then check for element
 
 wait = Selenium::WebDriver::Wait.new(:timeout => 300)
 
-load_time = wait.until {
+  wait.until {
   loading = driver.find_element(:id, "LoadTime")
-  loading if loading.displayed?
+  break if loading.displayed?
 }
 
-first_byte = driver.find_element(:id, "TTFB")
+# Change the current website page to grab data from the XML document
+
+page_url = driver.current_url
+new_url = page_url.sub!("result", "xmlResult")
+driver.navigate.to(new_url)
+
+grab_xml = Crack::XML.parse(driver.page_source)
+load_time = grab_xml["response"]["data"]["average"]["firstView"]["loadTime"]
+first_byte = grab_xml["response"]["data"]["average"]["firstView"]["TTFB"]
+
 
 puts "Test Passed" if load_time && first_byte
-puts load_time.text, first_byte.text
+puts load_time, first_byte
 
 
-emailbody = emailbody + "Values are #{load_time.text}(Load Time), #{first_byte.text}(First Byte), and is the website I used for #{urls}\n\n"
+emailbody = emailbody + "Values are #{load_time}(Load Time), #{first_byte}(First Byte), and is the website I used for #{urls}\n\n"
 
 end
 
@@ -71,7 +82,7 @@ config = YAML.load_file("cred.yml")
 gmail = Gmail.connect(config["config"]["email"], config["config"]["password"])
 
 email = gmail.compose do
-  to config["config"]["email"]
+  to config["config"]["to"]
   subject "I did it!"
   body " #{emailbody} "
 end
@@ -81,7 +92,6 @@ email.deliver!
 gmail.logout
 
 driver.quit
-
 
 
 
