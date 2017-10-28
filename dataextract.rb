@@ -6,7 +6,7 @@ require 'gmail'
 require 'nokogiri' 
 require 'selenium-webdriver'
 require 'open-uri'
-require 'crack/xml'
+require 'crack'
 
 # Pass File Into Script
 
