@@ -1,5 +1,4 @@
 # Load Ruby Gems
-
 require 'yaml'
 require 'rubygems'
 require 'gmail'
@@ -26,7 +25,7 @@ driver = Selenium::WebDriver.for :firefox
 emailbody = ""
 
 #Looping The Website
-#for urls in text_from_file can also be used
+#for urls in websites_from_file can also be used
 websites_from_file.each do |urls|
 
 driver.navigate.to "https://www.webpagetest.org"
@@ -59,9 +58,9 @@ wait = Selenium::WebDriver::Wait.new(:timeout => 300)
 
 page_url = driver.current_url
 new_url = page_url.sub!("result", "xmlResult")
-driver.navigate.to(new_url)
+xml_website = open(new_url).read
 
-grab_xml = Crack::XML.parse(driver.page_source)
+grab_xml = Crack::XML.parse(xml_website)
 load_time = grab_xml["response"]["data"]["average"]["firstView"]["loadTime"]
 first_byte = grab_xml["response"]["data"]["average"]["firstView"]["TTFB"]
 
