@@ -25,6 +25,7 @@ emailbody = ""
 
 #Looping The Website
 #for urls in text_from_file can also be used
+
 websites_from_file.each do |urls|
 
 driver.navigate.to "https://www.webpagetest.org"
@@ -71,7 +72,7 @@ config = YAML.load_file("cred.yml")
 gmail = Gmail.connect(config["config"]["email"], config["config"]["password"])
 
 email = gmail.compose do
-  to config["config"]["email"]
+  to config["config"]["to"]
   subject "I did it!"
   body " #{emailbody} "
 end
@@ -81,6 +82,7 @@ email.deliver!
 gmail.logout
 
 driver.quit
+
 
 
 
